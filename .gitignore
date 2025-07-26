@@ -1,0 +1,93 @@
+# Scala/SBT
+target/
+project/target/
+project/project/
+project/plugins/project/
+.cache
+.classpath
+.project
+.settings
+.metadata
+.metals/
+.bsp/
+bin/
+*.class
+*.log
+
+# SBT
+.sbt/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Assembly
+*.jar
+!src/main/resources/*.jar
+
+# Spark
+derby.log
+metastore_db/
+*.db
+
+# Output directories
+output/
+data/
+dumps/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+*.out
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Spark UI and events
+/tmp/spark-events/
+spark-events/
+
+# Service account keys (if any)
+sa-key.json
+*.key
+*.pem
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# JVM crash logs
+hs_err_pid*
+
+# Scala REPL
+.scala_history
+
+# Build artifacts
+build/
+dist/
+
+# Example files
+readme_example 

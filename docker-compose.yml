@@ -1,0 +1,29 @@
+services:
+  scala-spark:
+    build: .
+    container_name: scala-spark-broadcast-join
+    ports:
+      - "4040:4040"  # Spark UI
+      - "18080:18080"  # Spark History Server
+    volumes:
+      - ./data:/app/data  # Mount data directory for CSV files
+      - ./output:/app/output  # Mount output directory for results
+      - spark-events:/tmp/spark-events  # Persistent Spark events
+    environment:
+      - SPARK_HOME=/opt/spark
+      - JAVA_OPTS=-Xmx8g -Xms4g  # Adjust memory as needed
+      - SBT_OPTS=-Dsbt.server.autostart=false -Dsbt.server.directory=/tmp/sbt-server
+    working_dir: /app
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 16G  # Adjust based on your machine
+        reservations:
+          memory: 8G
+
+volumes:
+  spark-events:
+    driver: local 
