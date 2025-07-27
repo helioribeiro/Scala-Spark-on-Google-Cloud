@@ -107,15 +107,19 @@ curl -O https://storage.googleapis.com/scala_broadcast_join/data/airline.csv
 curl -O https://storage.googleapis.com/scala_broadcast_join/data/carriers.csv
 cd ..
 
-# 3️⃣ Build the Docker image (one-time setup)
+# 3️⃣ 🔧 Fix permissions
+mkdir -p output
+sudo chmod -R 755 output
+
+# 4️⃣ Build the Docker image (one-time setup)
 ./docker-run.sh build
 
-# 4️⃣ 🎯 Start Spark History Server (Recommended!)
+# 5️⃣ 🎯 Start Spark History Server (Recommended!)
 # Open a new terminal and run:
 ./docker-run.sh history
 # **Access:** http://localhost:18080
 
-# 5️⃣ Run the complete pipeline
+# 6️⃣ Run the complete pipeline
 ./docker-run.sh all
 ```
 

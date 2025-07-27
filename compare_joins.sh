@@ -15,9 +15,20 @@ echo "📦 Using pre-built JAR (from Docker image)..."
 echo "🗑️  Running garbage collection..."
 java -cp target/scala-2.12/scala-spark-broadcast-join-assembly-0.1.0.jar com.helioribeiro.BroadcastJoin --help > /dev/null 2>&1 || true
 
-# Create output directories
-mkdir -p output/broadcast_join_result
-mkdir -p output/regular_join_result
+# Create output directories with proper permissions
+echo "📁 Creating output directories..."
+mkdir -p output/broadcast_join_result 2>/dev/null || {
+    echo "⚠️  Permission denied creating output directories. Trying with sudo..."
+    sudo mkdir -p output/broadcast_join_result
+    sudo chown -R $USER:$USER output/
+    sudo chmod -R 755 output/
+}
+mkdir -p output/regular_join_result 2>/dev/null || {
+    echo "⚠️  Permission denied creating output directories. Trying with sudo..."
+    sudo mkdir -p output/regular_join_result
+    sudo chown -R $USER:$USER output/
+    sudo chmod -R 755 output/
+}
 
 # Function to extract metrics from output
 extract_metrics() {
@@ -44,12 +55,34 @@ echo ""
 echo "🔄 Running BROADCAST JOIN..."
 echo "=========================="
 
+# Function to get CPU count cross-platform
+get_cpu_count() {
+    if command -v nproc >/dev/null 2>&1; then
+        # Linux
+        nproc --all
+    elif command -v sysctl >/dev/null 2>&1; then
+        # macOS
+        sysctl -n hw.logicalcpu
+    else
+        # Fallback
+        getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4
+    fi
+}
+
+# Usage
+THREADS=$(get_cpu_count)
+PARTITIONS=$((THREADS * 2))
+
+echo ""
+echo "🧠 Detected $THREADS logical threads"
+echo "📊 Using $PARTITIONS partitions for Spark"
+
 # Run broadcast join with real-time output and capture for metrics
 broadcast_output=$(mktemp)
 spark-submit \
   --class com.helioribeiro.BroadcastJoin \
   --driver-memory 16g \
-  --conf spark.sql.shuffle.partitions=28 \
+  --conf spark.sql.shuffle.partitions="$PARTITIONS" \
   --conf spark.ui.enabled=true \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=file:///tmp/spark-events \
@@ -80,7 +113,7 @@ regular_output=$(mktemp)
 spark-submit \
   --class com.helioribeiro.RegularJoin \
   --driver-memory 16g \
-  --conf spark.sql.shuffle.partitions=28 \
+  --conf spark.sql.shuffle.partitions="$PARTITIONS" \
   --conf spark.ui.enabled=true \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=file:///tmp/spark-events \

@@ -79,7 +79,7 @@ show_usage() {
 
 # Function to build the image
 build_image() {
-    print_status "Building Docker image..."
+    print_status "\nBuilding Docker image..."
     docker-compose build
     print_success "Docker image built successfully!"
 }
@@ -91,9 +91,30 @@ start_shell() {
     docker-compose exec scala-spark bash
 }
 
+# Function to get CPU count cross-platform
+get_cpu_count() {
+    if command -v nproc >/dev/null 2>&1; then
+        # Linux
+        nproc --all
+    elif command -v sysctl >/dev/null 2>&1; then
+        # macOS
+        sysctl -n hw.logicalcpu
+    else
+        # Fallback
+        getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4
+    fi
+}
+
+# Usage
+THREADS=$(get_cpu_count)
+PARTITIONS=$((THREADS * 2))
+
 # Function to run CSV to Parquet conversion
 run_convert() {
     print_status "Running CSV to Parquet conversion..."
+    echo ""
+    echo "🧠 Detected $THREADS logical threads"
+    echo "📊 Using $PARTITIONS partitions for Spark"
     docker-compose up -d
     docker-compose exec scala-spark bash -c "
         echo 'Converting CSV to Parquet...'
@@ -101,7 +122,7 @@ run_convert() {
           --class com.helioribeiro.ConvertCsvToParquet \\
           --driver-memory 8g \\
           target/scala-2.12/scala-spark-broadcast-join-assembly-0.1.0.jar \\
-          data/airline.csv data/parquet/flights 28
+          data/airline.csv data/parquet/flights \"$PARTITIONS\"
         
         spark-submit \\
           --class com.helioribeiro.ConvertCsvToParquet \\
@@ -155,7 +176,7 @@ run_all() {
           --class com.helioribeiro.ConvertCsvToParquet \\
           --driver-memory 8g \\
           target/scala-2.12/scala-spark-broadcast-join-assembly-0.1.0.jar \\
-          data/airline.csv data/parquet/flights 28
+          data/airline.csv data/parquet/flights \"$PARTITIONS\"
         
         spark-submit \\
           --class com.helioribeiro.ConvertCsvToParquet \\

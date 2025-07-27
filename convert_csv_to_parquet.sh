@@ -18,6 +18,24 @@ echo ""
 echo "🔄 Converting AIRLINE.CSV to Parquet..."
 echo "======================================"
 
+# Function to get CPU count cross-platform
+get_cpu_count() {
+    if command -v nproc >/dev/null 2>&1; then
+        # Linux
+        nproc --all
+    elif command -v sysctl >/dev/null 2>&1; then
+        # macOS
+        sysctl -n hw.logicalcpu
+    else
+        # Fallback
+        getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4
+    fi
+}
+
+# Usage
+THREADS=$(get_cpu_count)
+PARTITIONS=$((THREADS * 2))
+
 # Convert airline.csv (large file)
 spark-submit \
   --class com.helioribeiro.ConvertCsvToParquet \
@@ -35,7 +53,7 @@ spark-submit \
   --conf log4j.logger.org.apache.spark.storage=ERROR \
   --conf log4j.logger.org.apache.spark.scheduler=ERROR \
   target/scala-2.12/scala-spark-broadcast-join-assembly-0.1.0.jar \
-  data/airline.csv data/parquet/flights 28 2>&1 | \
+  data/airline.csv data/parquet/flights "$PARTITIONS" 2>&1 | \
   grep -E "(ERROR|WARN|Input|Output|Partitions|Initial memory|Repartitioning|Writing|Total rows|Total execution|Final memory|Output written|CSV to Parquet conversion completed|Loading|█|░|🔄|📁|✔|⏱️|💾|📊)" | \
   while IFS= read -r line; do
     echo "$line"
