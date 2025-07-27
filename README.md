@@ -48,6 +48,9 @@ Google Cloud (Dataproc + Composer) later.
 | **Docker Compose** | ≥ 2.0 | Usually included with Docker |
 | **macOS** | M-series | Local execution tested on ARM, 48GB RAM |
 | **RAM** | ≥ 8GB | Minimum for Docker container |
+| **Data Files** | Required | Must download airline.csv & carriers.csv |
+
+> **📥 Data Download Required**: Before running any Docker commands, you must download the required data files to the `data/` folder. See the [Quick Start](#2-quick-start-with-docker) section for the exact commands.
 
 ### Docker Installation
 
@@ -97,15 +100,22 @@ docker run hello-world
 git clone https://github.com/helioribeiro/Scala-Spark-on-Google-Cloud.git
 cd Scala-Spark-on-Google-Cloud
 
-# 2️⃣ Build the Docker image (one-time setup)
+# 2️⃣ 📥 Download required data files (REQUIRED!)
+# Before running any Docker commands, you must download the data files:
+cd data
+curl -O https://storage.googleapis.com/scala_broadcast_join/data/airline.csv
+curl -O https://storage.googleapis.com/scala_broadcast_join/data/carriers.csv
+cd ..
+
+# 3️⃣ Build the Docker image (one-time setup)
 ./docker-run.sh build
 
-# 3️⃣ 🎯 Start Spark History Server (Recommended!)
+# 4️⃣ 🎯 Start Spark History Server (Recommended!)
 # Open a new terminal and run:
 ./docker-run.sh history
 # **Access:** http://localhost:18080
 
-# 4️⃣ Run the complete pipeline
+# 5️⃣ Run the complete pipeline
 ./docker-run.sh all
 ```
 

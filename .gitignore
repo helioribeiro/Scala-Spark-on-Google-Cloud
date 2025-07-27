@@ -32,8 +32,11 @@ metastore_db/
 
 # Output directories
 output/
-data/
 dumps/
+
+# Data directory - allow folder but ignore CSV files and subdirectories
+data/*.csv
+data/*/
 
 # IDE
 .idea/
