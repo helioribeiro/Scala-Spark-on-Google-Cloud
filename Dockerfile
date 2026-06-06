@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for Scala Spark Broadcast Join Project
-FROM openjdk:11-jdk-slim as base
+FROM eclipse-temurin:11-jdk-jammy AS base
 
 # Set environment variables
 ENV SCALA_VERSION=2.12.20
